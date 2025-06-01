@@ -40,3 +40,33 @@ namespace FileIndexingSystem.ScannerB
 
             readThread.Start();
         }
+
+        private List<WordIndexEntry> IndexFiles(string dir)
+        {
+            var list = new List<WordIndexEntry>();
+            var files = Directory.GetFiles(dir, "*.txt");
+
+            foreach (var file in files)
+            {
+                var content = File.ReadAllText(file);
+                var words = content.Split(' ', '\n', '\r', '.', ',', ';', ':');
+                var counts = words
+                    .Where(w => !string.IsNullOrWhiteSpace(w))
+                    .GroupBy(w => w.ToLower())
+                    .ToDictionary(g => g.Key, g => g.Count());
+
+                foreach (var pair in counts)
+                {
+                    list.Add(new WordIndexEntry
+                    {
+                        FileName = Path.GetFileName(file),
+                        Word = pair.Key,
+                        Count = pair.Value
+                    });
+                }
+            }
+
+            return list;
+        }
+    }
+}
