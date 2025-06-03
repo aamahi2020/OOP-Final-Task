@@ -25,3 +25,21 @@ namespace FileIndexingSystem.Master
             thread1.Start();
             thread2.Start();
         }
+
+        private void Listen(string pipeName)
+        {
+            using var server = new NamedPipeServerStream(pipeName, PipeDirection.In);
+            Console.WriteLine($"Waiting for {pipeName}...");
+            server.WaitForConnection();
+            using var reader = new StreamReader(server);
+            var json = reader.ReadLine() ?? "[]";
+            var entries = PipeHelper.Deserialize(json);
+
+            Console.WriteLine($"\nData from {pipeName}:");
+            foreach (var entry in entries)
+            {
+                Console.WriteLine($"{entry.FileName}:{entry.Word}:{entry.Count}");
+            }
+        }
+    }
+}
