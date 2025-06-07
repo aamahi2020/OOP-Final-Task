@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO.Pipes;
 using FileIndexingSystem.Models;
+using FileIndexingSystem.Shared;
 
 namespace FileIndexingSystem.Master
 {
