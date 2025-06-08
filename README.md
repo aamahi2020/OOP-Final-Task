@@ -15,18 +15,18 @@ Technologies Used
 
 Project Structure
 /Master
-└── MasterWorker.cs
-└── Program.cs
+ MasterWorker.cs
+ Program.cs
 /ScannerA
-└── ScannerWorker.cs
-└── Program.cs
+ ScannerWorker.cs
+ Program.cs
 /ScannerB
-└── ScannerWorker.cs
-└── Program.cs
+ ScannerWorker.cs
+ Program.cs
 /Models
-└── WordIndexEntry.cs
+ WordIndexEntry.cs
 /Shared
-└── PipeHelper.cs
+ PipeHelper.cs
 
 Named Pipe Names
 agent1 → used by `ScannerA`
