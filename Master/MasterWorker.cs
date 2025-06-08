@@ -8,6 +8,8 @@ namespace FileIndexingSystem.Master
     public class MasterWorker
     {
         private readonly string pipe1, pipe2;
+        private List<WordIndexEntry> entries1 = new();
+        private List<WordIndexEntry> entries2 = new();
 
         public MasterWorker(string p1, string p2)
         {
@@ -20,14 +22,30 @@ namespace FileIndexingSystem.Master
 #if WINDOWS
             Process.GetCurrentProcess().ProcessorAffinity = (IntPtr)0x4;
 #endif
-            var thread1 = new Thread(() => Listen(pipe1));
-            var thread2 = new Thread(() => Listen(pipe2));
+            var t1 = new Thread(() => entries1 = Listen(pipe1));
+            var t2 = new Thread(() => entries2 = Listen(pipe2));
 
-            thread1.Start();
-            thread2.Start();
+            t1.Start(); t2.Start();
+            t1.Join(); t2.Join();
+
+            Console.WriteLine("\nPress ENTER to merge results...");
+            Console.ReadLine();
+
+            var merged = entries1.Concat(entries2)
+                .GroupBy(e => e.Word)
+                .Select(g => new WordIndexEntry
+                {
+                    FileName = "AllFiles",
+                    Word = g.Key,
+                    Count = g.Sum(e => e.Count)
+                });
+
+            Console.WriteLine("\nMerged Result (Total Word Count):");
+            foreach (var entry in merged.OrderBy(e => e.Word))
+                Console.WriteLine($"{entry.Word}:{entry.Count}");
         }
 
-        private void Listen(string pipeName)
+        private List<WordIndexEntry> Listen(string pipeName)
         {
             using var server = new NamedPipeServerStream(pipeName, PipeDirection.In);
             Console.WriteLine($"Waiting for {pipeName}...");
@@ -38,9 +56,9 @@ namespace FileIndexingSystem.Master
 
             Console.WriteLine($"\nData from {pipeName}:");
             foreach (var entry in entries)
-            {
                 Console.WriteLine($"{entry.FileName}:{entry.Word}:{entry.Count}");
-            }
+
+            return entries;
         }
     }
 }
